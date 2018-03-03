@@ -1,7 +1,7 @@
 let FixedSupplyToken = artifacts.require("./FixedSupplyToken.sol");
 let Exchange = artifacts.require("./Exchange.sol");
 
-contract("Exchange Basic Tests", function(accounts){
+contract("Exchange: Deposits and Withdrawals", function(accounts){
     let fsTokenInstance;
     let exchangeInstance;
 
@@ -49,7 +49,17 @@ contract("Exchange Basic Tests", function(accounts){
         }).then(function(balanceInWei){
             assert.equal(balanceInWei.toNumber(), 0, "There is no more ether available");
             assert.isAtLeast(balanceAfterWithdrawal.toNumber(),balanceBeforeTx.toNumber() - gasUsed * 2, "there is one ETH available after withdrawal")
-        })
-    })
+        });
+    });
 
+    it("should be possible to deposit a Token", function(){
+     return fsTokenInstance.approve(exchangeInstance.address, 2000).then(function(txResult){
+         return exchangeInstance.depositToken("FIXED", 2000)
+     }).then(function(depositTxResult){
+         return exchangeInstance.getBalance("FIXED");
+     }).then(function(balanceOfToken){
+         assert.equal(balanceOfToken, 2000, "There should be 2000 tokens in the balance");
+     });
+
+    });
 });
