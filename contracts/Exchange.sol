@@ -50,15 +50,19 @@ contract Exchange is owned {
 
     //Ether Management
     function depositEther() payable {
-
+        require( balanceEthForAddress[msg.sender] + msg.value >= balanceEthForAddress[msg.sender]);
+        balanceEthForAddress[msg.sender] += msg.value;
     }
 
     function withdrawEther(uint amountInWei) {
-
+        require(balanceEthForAddress[msg.sender] - amountInWei >= 0);
+        require(balanceEthForAddress[msg.sender] - amountInWei <= balanceEthForAddress[msg.sender]);
+        balanceEthForAddress[msg.sender] -= amountInWei;
+        msg.sender.transfer(amountInWei);
     }
 
     function getEtherBalanceInWei() constant returns(uint)  {
-
+        return balanceEthForAddress[msg.sender];
     }
     //Token Management
 
@@ -86,11 +90,9 @@ contract Exchange is owned {
     function getSymbolIndex(string symbolName) internal returns(uint8) {
 
         for (uint8 i = 1; i <= symbolNameIndex; i++) {
-
             if (stringsEqual(tokens[i].symbolName, symbolName)) {
                 return i;
             }
-         
         }
             
         return 0;
