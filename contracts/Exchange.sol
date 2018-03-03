@@ -47,6 +47,20 @@ contract Exchange is owned {
     mapping(address => uint) balanceEthForAddress;
 
     //Event Management
+    event TokenAddedToSystem(uint _symbolIndex, string _token, uint _timestamp);
+    event DepositForTokenReceived(address indexed _from, uint indexed _symbolIndex, uint _amount, uint _timestamp);
+    event WithdrawalToken(address indexed _to, uint indexed _symbolIndex, uint _amount, uint _timestamp);
+   
+    event DepositForEthReceived(address indexed _from, uint _amount, uint _timestampe);
+    event WithdrawalEth(address indexed _to, uint _amount, uint _timestamp);
+
+    event LimitSellOrderCreated(uint indexed _symbolIndex, address indexed _who, uint _amountTokens, uint _priceInWei, uint _orderKey);
+    event SellOrderFulfilled(uint indexed _symbolIndex, uint _amount, uint _priceInWei, uint _orderKey);
+    event SellOrderCancelled(uint indexed _symbolIndex, uint _priceInWei, uint _orderKey);
+    
+    event LimitBuyOrderCreated(uint indexed _symbolIndex, address indexed _who, uint _amountTokens, uint _priceInWei, uint _orderKey);
+    event BuyOrderFulfilled(uint indexed _symbolIndex, uint _amount, uint _priceInWei, uint _orderKey);
+    event BuyOrderCancelled(uint indexed _symbolIndex, uint _priceInWei, uint _orderKey);
 
     //Ether Management
     function depositEther() payable {
