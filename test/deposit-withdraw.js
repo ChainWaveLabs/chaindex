@@ -18,7 +18,8 @@ contract("Exchange: Deposits and Withdrawals", (accounts) => {
     });
 
     it("Should allow addition of tokens", () => {
-        return exchangeInstance.addToken("FIXED", fsTokenInstance.address).then( () => {
+        return exchangeInstance.addToken("FIXED", fsTokenInstance.address).then( (txResult) => {
+            assert.equal(txResult.logs[0].event,"TokenAddedToSystem", "TokenAddedToSystem event not fired");
             return exchangeInstance.hasToken.call("FIXED");
         }).then( (boolHasToken) => {
             assert.equal(boolHasToken, true, "Token was not added");
@@ -39,6 +40,7 @@ contract("Exchange: Deposits and Withdrawals", (accounts) => {
                 value: web3.toWei(1, "ether")
             })
             .then((txResult) => {
+                assert.equal(txResult.logs[0].event,"DepositForEthReceived", "DepositForEthReceived event not fired");
                 gasUsed += txResult.receipt.cumulativeGasUsed * web3.eth.getTransaction(txResult.receipt.transactionHash).gasPrice.toNumber();
                 balanceAfterDeposit = web3.eth.getBalance(accounts[0]);
                 return exchangeInstance.getEthBalanceInWei.call();
@@ -47,6 +49,7 @@ contract("Exchange: Deposits and Withdrawals", (accounts) => {
                 assert.isAtLeast(balanceBeforeTx.toNumber() - balanceAfterDeposit.toNumber(), web3.toWei(1, "ether"), "Balance of ");
                 return exchangeInstance.withdrawEther(web3.toWei(1, "ether"));
             }).then((txResult) => {
+                assert.equal(txResult.logs[0].event,"WithdrawEth", "WithdrawEth event not fired");
                 balanceAfterWithdrawal = web3.eth.getBalance(accounts[0]);
                 return exchangeInstance.getEthBalanceInWei.call();
             }).then((balanceInWei) => {
@@ -59,6 +62,7 @@ contract("Exchange: Deposits and Withdrawals", (accounts) => {
         return fsTokenInstance.approve(exchangeInstance.address, 2000).then((txResult) => {
             return exchangeInstance.depositToken("FIXED", 2000)
         }).then((depositTxResult) => {
+            assert.equal(depositTxResult.logs[0].event,"DepositForTokenReceived", "DepositForTokenReceived event not fired");
             return exchangeInstance.getBalance("FIXED");
         }).then((balanceOfToken) => {
             assert.equal(balanceOfToken, 2000, "There should be 2000 tokens in the balance");
@@ -79,6 +83,7 @@ contract("Exchange: Deposits and Withdrawals", (accounts) => {
             balanceTokenInTokenBeforeWithdrawal = tokenBalance.toNumber();
             return exchangeInstance.withdrawToken("FIXED", balanceTokenInExchangeBeforeWithdrawal)
         }).then((withdrawTxResult) => {
+            assert.equal(withdrawTxResult.logs[0].event,"WithdrawToken", "WithdrawToken event not fired");
             return exchangeInstance.getBalance.call("FIXED")
         }).then((exchangeBalanceAfterWithdrawal) => {
             balanceTokenInExchangeAfterWithdrawal = exchangeBalanceAfterWithdrawal.toNumber();
