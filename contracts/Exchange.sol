@@ -6,15 +6,37 @@ import "./FixedSupplyToken.sol";
 contract Exchange is owned {
 
     struct Offer {
-
+        address who;
+        uint amount;
     }
 
     struct OrderBook {
+        //linked list to and from higher/lower
+        uint higherPrice;
+        uint lowerPrice;
 
+        //Stack of offers
+        mapping(uint => Offer) offers;
+
+        uint offers_key;
+        uint offers_length;
     }
 
     struct Token {
+        address tokenContract;
+        string symbolName;
 
+        mapping(uint => OrderBook) buyBook;
+
+        uint currentBuyPrice;
+        uint lowestBuyPrice;
+        uint amountBuyPrice;
+
+        mapping(uint => OrderBook) sellBook;
+
+        uint currentSellPrice;
+        uint lowestSellPrice;
+        uint amountSellPrice;
     }
 
     mapping(uint8 => Token) tokens;
