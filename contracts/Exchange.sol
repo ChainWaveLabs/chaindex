@@ -121,14 +121,42 @@ contract Exchange is owned {
 
     function depositToken( string symbolName, uint amount) {
 
+        //get token index & contract address
+        uint8 index = getSymbolIndex(symbolName);
+        require(index > 0);
+
+        address erc20TokenContract = tokens[index].tokenContract;
+        require(erc20TokenContract != address(0));
+
+        //Interface via ERC20 Standard
+        ERC20Interface token = ERC20Interface(erc20TokenContract);
+        
+        require(token.transferFrom(msg.sender, address(this), amount) == true);
+        require(tokenBalanceForAddress[msg.sender][index] + amount >= tokenBalanceForAddress[msg.sender][index]);
+        tokenBalanceForAddress[msg.sender][index] += amount;
     }
 
     function withdrawToken(string symbolName, uint amount ) {
 
+        uint8 index = getSymbolIndex(symbolName);
+        require(index > 0);
+
+        address erc20TokenContract = tokens[index].tokenContract;
+        require(erc20TokenContract != address(0));
+
+         //Interface via ERC20 Standard
+        ERC20Interface token = ERC20Interface(erc20TokenContract);
+
+        require(tokenBalanceForAddress[msg.sender][index] - amount >= 0);
+        require(tokenBalanceForAddress[msg.sender][index] - amount <= tokenBalanceForAddress[msg.sender][index]);
+        tokenBalanceForAddress[msg.sender][index] -= amount;
+        require(token.transfer(msg.sender, amount) == true);
     }
 
     function getBalance(string symbolName) constant returns (uint) {
-
+        uint8 index = getSymbolIndex(symbolName);
+        require(index>0);
+        return tokenBalanceForAddress[msg.sender][index];
     }
 
     //OrderBook - Bids/Buys
