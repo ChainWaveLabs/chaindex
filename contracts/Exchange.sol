@@ -61,7 +61,7 @@ contract Exchange is owned {
         msg.sender.transfer(amountInWei);
     }
 
-    function getEtherBalanceInWei() constant returns(uint)  {
+    function getEthBalanceInWei() constant returns(uint)  {
         return balanceEthForAddress[msg.sender];
     }
     //Token Management
