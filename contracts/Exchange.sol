@@ -66,30 +66,25 @@ contract Exchange is owned {
     function depositEther() payable {
         require( balanceEthForAddress[msg.sender] + msg.value >= balanceEthForAddress[msg.sender]);
         balanceEthForAddress[msg.sender] += msg.value;
-        DepositForEthReceived(msg.sender,msg.value,now);
-    }
+        DepositForEthReceived(msg.sender,msg.value,now);}
 
     function withdrawEther(uint amountInWei) {
         require(balanceEthForAddress[msg.sender] - amountInWei >= 0);
         require(balanceEthForAddress[msg.sender] - amountInWei <= balanceEthForAddress[msg.sender]);
         balanceEthForAddress[msg.sender] -= amountInWei;
         msg.sender.transfer(amountInWei);
-        WithdrawEth(msg.sender,amountInWei,now);
-    }
+        WithdrawEth(msg.sender,amountInWei,now);}
 
     function getEthBalanceInWei() constant returns(uint)  {
-        return balanceEthForAddress[msg.sender];
-    }
+        return balanceEthForAddress[msg.sender];}
     //Token Management
-
     function addToken(string  symbolName, address erc20TokenAddress) onlyowner {
         //check if symbol name is in exhange
         require(!hasToken(symbolName));
         symbolNameIndex ++;
         tokens[symbolNameIndex].symbolName = symbolName;
         tokens[symbolNameIndex].tokenContract = erc20TokenAddress;
-        TokenAddedToSystem(symbolNameIndex, symbolName, now);
-    }
+        TokenAddedToSystem(symbolNameIndex, symbolName, now);}
 
     function hasToken(string symbolName) constant returns (bool) {
         
@@ -100,9 +95,7 @@ contract Exchange is owned {
         }
             
 
-        return true;
-    }
-
+        return true;}
     //returns index of specific token in tokens mapping by name
     function getSymbolIndex(string symbolName) internal returns(uint8) {
 
@@ -112,10 +105,8 @@ contract Exchange is owned {
             }
         }
             
-        return 0;
-    }
+        return 0;}
 
-    //Utility
     //Standard Solidity string comparison function
     function stringsEqual(string storage _a, string memory _b) internal returns (bool) {
         
@@ -131,11 +122,9 @@ contract Exchange is owned {
                 return false;
             }
         }
-        return true;
-    }
+        return true;}
 
     //Token Depoist and Withdrawal
-
     function depositToken( string symbolName, uint amount) {
 
         //get token index & contract address
@@ -151,8 +140,7 @@ contract Exchange is owned {
         require(token.transferFrom(msg.sender, address(this), amount) == true);
         require(tokenBalanceForAddress[msg.sender][index] + amount >= tokenBalanceForAddress[msg.sender][index]);
         tokenBalanceForAddress[msg.sender][index] += amount;
-        DepositForTokenReceived(msg.sender, index, amount, now);
-    }
+        DepositForTokenReceived(msg.sender, index, amount, now);}
 
     function withdrawToken(string symbolName, uint amount ) {
 
@@ -170,35 +158,112 @@ contract Exchange is owned {
         tokenBalanceForAddress[msg.sender][index] -= amount;
         require(token.transfer(msg.sender, amount) == true);
         WithdrawToken(msg.sender, index, amount, now);
-    }
+        }
 
     function getBalance(string symbolName) constant returns (uint) {
         uint8 index = getSymbolIndex(symbolName);
         require(index>0);
         return tokenBalanceForAddress[msg.sender][index];
-    }
+        }
 
+    
+    
     //OrderBook - Bids/Buys
-    function getBuyOrderBook(string symbolName) constant returns (uint[], uint[]) {
-
-    }
+    function getBuyOrderBook(string symbolName) constant returns (uint[], uint[]) {}
     //Orderbook - Sells/Asks
-    function getSellOrderBook(string symbolName) constant returns (uint[], uint[]) {
-
-    }
+    function getSellOrderBook(string symbolName) constant returns (uint[], uint[]) { }
 
     //New Bid Order
-
     function buyToken(string symbolName, uint priceInWei, uint amount) {
+        uint8 tokenNameIndex = getSymbolIndex(symbolName);
+        require(tokenNameIndex > 0);
+        uint total_amount_eth_necessary = 0;
+        uint total_amount_eth_available = 0;
 
+        total_amount_ether_necessary = amount * priceInWei;
+
+        require(total_amount_ether_necessary >= amount && total_amount_ether_necessary >= priceInWei);
+        require(balanceEthForAddress[msg.sender] >= total_amount_eth_necessary);
+        require(balanceEthForAddress[msg.sender] - total_amount_eth_necessary >= 0);
+
+        balanceEthForAddress[msg.sender] -= total_amount_ether_necessary;
+
+        if(tokens[tokenNameIndex].amountSellPrice == 0 || tokens[tokenNameIndex].currentSellPrice > priceInWei ){
+            //no offers that can fill this, create a new buy offer in orderbook
+            addBuyOffer(tokenNameIndex, priceInWei, amount, msg.sender);
+            LimitBuyOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, tokens[tokenNameIndex].buyBook[priceInwei].offers_length);
+        } else {
+            //TODO: market order
+            revert();
+        }
     }
+
+    function addBuyOffer(uint8 tokenNameIndex, uint priceInWei, uint amount, address who) internal {
+        tokens[tokenIndex].buyBook[priceInWei].offers_length ++;
+        tokens[tokenIndex].buyBook[priceInWei].offers[tokens[tokenIndex].buyBook[priceInWei].offers_length] = Offer(amount, who);
+
+        //in the order book, we need to reorder the linked list of orders based on a new buy offer coming in
+        if (tokens[tokenIndex].buyBook[priceInWei].offers_length == 1) {
+            tokens[tokenIndex].buyBook[priceInWei].offers_key = 1;
+            tokens[tokenIndex].amountBuyPrice ++;
+
+            uint currentBuyPrice = tokens[tokenIndex].currentBuyPrice;
+            uint lowestBuyPrice = tokens[tokenIndex].lowestBuyPrice;
+            
+
+            if(lowestBuyPrice == 0 || lowestBuyPrice > priceInWei) {
+                ///the buy offer is the lowest one
+                if(currentBuyPrice == 0){
+                    //no order exists must create new
+                    tokens[tokenIndex].currentBuyPrice = priceInWei;
+                    tokens[tokenIndex].buyBook[priceInWei].higherPrice = priceInWei;
+                    tokens[tokenIndex].buyBook[priceInWei].lowerPrice = 0;
+                } else {
+                    tokens[tokenIndex].buyBook[lowestBuyPrice].lowerPrice = priceInWei;
+                    tokens[tokenIndex].buyBook[priceInWei].higherPrice = lowestBuyPrice;
+                    tokens[tokenIndex].buyBook[priceInWei].lowerPrice = 0;
+                }
+                tokens[tokenIndex].lowestBuyPrice = priceInWei;
+            } else if (currentBuyPrice < priceInWei) {
+                //if the offer is the highest, we don't need to reorder thes list, just append it
+                    tokens[tokenIndex].buyBook[currentBuyPrice].higherPrice = priceInWei;
+                    tokens[tokenIndex].buyBook[priceInWei].higherPrice = priceInWei;
+                    tokens[tokenIndex].buyBook[priceInWei].lowerPrice = currentBuyPrice;
+                    tokens[tokenIndex].currentBuyPrice = priceInWei;
+            } else {
+                //the buy order is in the middle, so we need to find the spot in the linked list then reorder everything
+
+                //find correct spot in book
+                uint buyPrice = tokens[tokenIndex].currentBuyPrice;
+                bool foundSpot = false;
+
+                while(buyPrice > 0 && !foundSpot){
+
+                    if (buyPrice < priceInWei && tokens[tokenIndex].buyBook[buyPrice].higherPrice > priceInWei){
+                        //set new order book entry high/low first
+                        tokens[tokenIndex].buyBook[priceInWei].lowerPrice = buyPrice;
+                        tokens[tokenIndex].buyBook[priceInWei].higherPrice = tokens[tokenIndex].buyBook[buyPrice].higherPrice;
+
+                        //set the higer priced order book entries' lowerPrice to the current price
+                        tokens[tokenIndex].buyBook[tokens[tokenIndex].buyBook[buyPrice].higherPrice].lowerPrice = priceInWei;
+
+                        //set the lower priced book entries' higerPrice ot the current
+                        tokens[tokenIndex].buyBook[buyPrice].higherPrice = priceInWei;
+
+                        foundSpot = true;
+                    }
+                    
+                    buyPrice = tokens[tokenIndex].buyBook[buyPrice].lowerPrice;
+                }
+            
+            }
+
+        }
+    }
+
     //New Ask Order
-    function sellToken(string symbolName, uint priceInWei, uint amount) {
-
-    }
+    function sellToken(string symbolName, uint priceInWei, uint amount) {}
 
     //cancels limit order
-    function cancelOrder(string symbolName,  bool isSellOrder, uint priceInWei, uint offerKey) {
-
-    }
+    function cancelOrder(string symbolName,  bool isSellOrder, uint priceInWei, uint offerKey) {}
 }
