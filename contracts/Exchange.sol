@@ -164,10 +164,8 @@ contract Exchange is owned {
         uint8 index = getSymbolIndex(symbolName);
         require(index>0);
         return tokenBalanceForAddress[msg.sender][index];
-        }
+    }
 
-    
-    
     //OrderBook - Bids/Buys
     function getBuyOrderBook(string symbolName) constant returns (uint[], uint[]) {
         //get two arrays - price points and volume per price point
@@ -247,16 +245,16 @@ contract Exchange is owned {
     function buyToken(string symbolName, uint priceInWei, uint amount) {
         uint8 tokenNameIndex = getSymbolIndex(symbolName);
         require(tokenNameIndex > 0);
-        uint total_amount_eth_necessary = 0;
-        uint total_amount_eth_available = 0;
+        uint totalAmountEthNecessary = 0;
+        uint totalAmountEthAvailable = 0;
 
-        total_amount_eth_necessary = amount * priceInWei;
+        totalAmountEthNecessary = amount * priceInWei;
 
-        require(total_amount_eth_necessary >= amount && total_amount_eth_necessary >= priceInWei);
-        require(balanceEthForAddress[msg.sender] >= total_amount_eth_necessary);
-        require(balanceEthForAddress[msg.sender] - total_amount_eth_necessary >= 0);
+        require(totalAmountEthNecessary >= amount && totalAmountEthNecessary >= priceInWei);
+        require(balanceEthForAddress[msg.sender] >= totalAmountEthNecessary);
+        require(balanceEthForAddress[msg.sender] - totalAmountEthNecessary >= 0);
 
-        balanceEthForAddress[msg.sender] -= total_amount_eth_necessary;
+        balanceEthForAddress[msg.sender] -= totalAmountEthNecessary;
 
         if(tokens[tokenNameIndex].amountSellPrices == 0 || tokens[tokenNameIndex].currentSellPrice > priceInWei ){
             //no offers that can fill this, create a new buy offer in orderbook
@@ -335,15 +333,15 @@ contract Exchange is owned {
     function sellToken(string symbolName, uint priceInWei, uint amount) {
         uint8 tokenNameIndex = getSymbolIndex(symbolName);
         require(tokenNameIndex > 0);
-        uint total_amount_eth_necessary = 0;
-        uint total_amount_eth_available = 0;
+        uint totalAmountEthNecessary = 0;
+        uint totalAmountEthAvailable = 0;
 
-        total_amount_eth_necessary = amount * priceInWei;
+        totalAmountEthNecessary = amount * priceInWei;
 
-        require(total_amount_eth_necessary >= amount && total_amount_eth_necessary >= priceInWei);
-        require(tokenBalanceForAddress[msg.sender][tokenNameIndex] >= total_amount_eth_necessary);
-        require(tokenBalanceForAddress[msg.sender][tokenNameIndex] - total_amount_eth_necessary >= 0);
-        require(balanceEthForAddress[msg.sender] + total_amount_eth_necessary >= balanceEthForAddress[msg.sender]);
+        require(totalAmountEthNecessary >= amount && totalAmountEthNecessary >= priceInWei);
+        require(tokenBalanceForAddress[msg.sender][tokenNameIndex] >= totalAmountEthNecessary);
+        require(tokenBalanceForAddress[msg.sender][tokenNameIndex] - totalAmountEthNecessary >= 0);
+        require(balanceEthForAddress[msg.sender] + totalAmountEthNecessary >= balanceEthForAddress[msg.sender]);
 
         tokenBalanceForAddress[msg.sender][tokenNameIndex] -= amount;
 
@@ -370,9 +368,9 @@ contract Exchange is owned {
             uint highestSellPrice = tokens[tokenNameIndex].highestSellPrice;
             
 
-            if(highestSellPrice == 0 || highestSellPrice < priceInWei) {
+            if (highestSellPrice == 0 || highestSellPrice < priceInWei) {
                 ///the sell offer is the highest one
-                if(currentSellPrice == 0){
+                if (currentSellPrice == 0) {
                     //no order exists must create new
                     tokens[tokenNameIndex].currentSellPrice = priceInWei;
                     tokens[tokenNameIndex].sellBook[priceInWei].higherPrice = 0;
