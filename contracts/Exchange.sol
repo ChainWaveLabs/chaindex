@@ -180,28 +180,33 @@ contract Exchange is owned {
 
         //Go from lowest price to current price and add them into our price + volume arrays.
         //increment both prices and volume array
-        while (tokens[index].currentBuyPrice > 0) {
-            arrPricesBuy[counter] = whilePrice; 
-            uint volumeAtPrice = 0;
-            uint offers_key = 0;
+        if(tokens[index].currentBuyPrice > 0){
+       
+            while (whilePrice <= tokens[index].currentBuyPrice) {
+                arrPricesBuy[counter] = whilePrice; 
+                uint volumeAtPrice = 0;
+                uint offers_key = 0;
 
-            offers_key = tokens[index].buyBook[whilePrice].offers_key;
+                offers_key = tokens[index].buyBook[whilePrice].offers_key;
 
-            //volume is the sum of all offers in a single price.. iterate thru offers and sum volumeAtPrice
-            while (offers_key <= tokens[index].buyBook[whilePrice].offers_length) {
-                volumeAtPrice = tokens[index].buyBook[whilePrice].offers[offers_key].amount;
-                offers_key++;
+                //volume is the sum of all offers in a single price.. iterate thru offers and sum volumeAtPrice
+                while (offers_key <= tokens[index].buyBook[whilePrice].offers_length) {
+                    volumeAtPrice += tokens[index].buyBook[whilePrice].offers[offers_key].amount;
+                    offers_key++;
+                }
+                arrVolumesBuy[counter] = volumeAtPrice;
+                //when the whilePrice hits the higher price of given book, we break
+                //otherwise set the while price to the higher price of the given book.
+                if (whilePrice == tokens[index].buyBook[whilePrice].higherPrice) {
+                break;
+                } else {
+                    whilePrice = tokens[index].buyBook[whilePrice].higherPrice;
+                }
+                counter++;
             }
-            arrVolumesBuy[counter] = volumeAtPrice;
-            //when the whilePrice hits the higher price of given book, we break
-            //otherwise set the while price to the higher price of the given book.
-            if (whilePrice == tokens[index].buyBook[whilePrice].higherPrice) {
-             break;
-            } else {
-                whilePrice = tokens[index].buyBook[whilePrice].higherPrice;
-            }
-            counter++;
         }
+    return (arrPricesBuy, arrVolumesBuy);
+        
     }
 
     //Orderbook - Sells/Asks
@@ -217,28 +222,33 @@ contract Exchange is owned {
 
         //Go from lowest price to current price and add them into our price + volume arrays.
         //increment both prices and volume array
-        while (tokens[index].currentSellPrice < 0) {
-            arrPricesSell[counter] = whilePrice; 
-            uint volumeAtPrice = 0;
-            uint offers_key = 0;
+        if(tokens[index].currentSellPrice > 0){
+        
+            while (whilePrice <= tokens[index].highestSellPrice) {
+                arrPricesSell[counter] = whilePrice; 
+                uint volumeAtPrice = 0;
+                uint offers_key = 0;
 
-            offers_key = tokens[index].sellBook[whilePrice].offers_key;
+                offers_key = tokens[index].sellBook[whilePrice].offers_key;
 
-            //volume is the sum of all offers in a single price.. iterate thru offers and sum volumeAtPrice
-            while (offers_key <= tokens[index].sellBook[whilePrice].offers_length) {
-                volumeAtPrice = tokens[index].sellBook[whilePrice].offers[offers_key].amount;
-                offers_key++;
+                //volume is the sum of all offers in a single price.. iterate thru offers and sum volumeAtPrice
+                while (offers_key <= tokens[index].sellBook[whilePrice].offers_length) {
+                    volumeAtPrice += tokens[index].sellBook[whilePrice].offers[offers_key].amount;
+                    offers_key++;
+                }
+                arrVolumesSell[counter] = volumeAtPrice;
+                //when the whilePrice hits the higher price of given book, we break
+                //otherwise set the while price to the higher price of the given book.
+                if (0 == tokens[index].sellBook[whilePrice].higherPrice) {
+                break;
+                } else {
+                    whilePrice = tokens[index].sellBook[whilePrice].higherPrice;
+                }
+                counter++;
             }
-            arrVolumesSell[counter] = volumeAtPrice;
-            //when the whilePrice hits the higher price of given book, we break
-            //otherwise set the while price to the higher price of the given book.
-            if (0 == tokens[index].sellBook[whilePrice].higherPrice) {
-             break;
-            } else {
-                whilePrice = tokens[index].sellBook[whilePrice].higherPrice;
-            }
-            counter++;
         }
+
+    return (arrPricesSell, arrVolumesSell);
     }
 
     //New Bid Order
@@ -256,7 +266,7 @@ contract Exchange is owned {
 
         balanceEthForAddress[msg.sender] -= totalAmountEthNecessary;
 
-        if(tokens[tokenNameIndex].amountSellPrices == 0 || tokens[tokenNameIndex].currentSellPrice > priceInWei ){
+        if (tokens[tokenNameIndex].amountSellPrices == 0 || tokens[tokenNameIndex].currentSellPrice > priceInWei) {
             //no offers that can fill this, create a new buy offer in orderbook
             addBuyOffer(tokenNameIndex, priceInWei, amount, msg.sender);
             LimitBuyOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, tokens[tokenNameIndex].buyBook[priceInWei].offers_length);
