@@ -51,21 +51,25 @@ contract("Exchange: Order Book Functionality", (accounts) => {
     });
 
     it("should be possible to add multiple limit buy orders", () => {
+        let orderBookLengthBeforeBuy;
         return exchangeInstance.getBuyOrderBook.call("FIXED")
         .then( (orderBook) => {
-            assert.equal(orderBook.length, 2, "Orderbook should have a length of 2");
-            assert.equal(orderBook[0].length, 0, "Orderbook should have no limit buy orders");
-            return exchangeInstance.buyToken("FIXED", web3.toWei(1,"finney"), 5);
+            orderBookLengthBeforeBuy = orderBook[0].length;
+            return exchangeInstance.buyToken("FIXED", web3.toWei(2,"finney"), 5);
         }).then((txResult) => {
             //look into logs to assert then get orderbook again
             assert.equal(txResult.logs.length, 1, "There should be at least one log entry");
             assert.equal(txResult.logs[0].event, "LimitBuyOrderCreated",  "LimitBuyOrderCreated event not fired");
-            return exchangeInstance.getBuyOrderBook.call("FIXED");
+            return exchangeInstance.buyToken("FIXED", web3.toWei(1.4,"finney"), 5);
             
-        }).then((orderBook) => {
-            assert.equal(orderBook[0].length, 1, "Orderbook price  at zero index should have 1 buy offers");
-            assert.equal(orderBook[1].length, 1, "Orderbook volume at zero index should have 1 instance ");
-         
+        }).then((txResult) => {
+            assert.equal(txResult.logs.length, 1, "There should be at least one log entry");
+            assert.equal(txResult.logs[0].event, "LimitBuyOrderCreated",  "LimitBuyOrderCreated event not fired");
+            return exchangeInstance.getBuyOrderBook.call("FIXED")
+                     
+        }).then((orderBook ) => {
+            assert.equal(orderBook[0].length, orderBookLengthBeforeBuy+2, "Orderbook[0] should have 2 more orders than it started with ")
+            assert.equal(orderBook[1].length, orderBookLengthBeforeBuy+2, "Orderbook[1] should have 2 more orders than it started with ")
         });
     });
 
@@ -79,7 +83,9 @@ contract("Exchange: Order Book Functionality", (accounts) => {
 
     it("should be able to retrieve sell order book", () => {
 
-    })
+    });
+
+
 
 
 })
