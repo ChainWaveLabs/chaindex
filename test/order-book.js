@@ -119,6 +119,30 @@ contract("Exchange: Order Book Functionality", (accounts) => {
             //3. add tokens back to address' balance
             //4. remove from sell book
             //5. Event
+
+            let orderBookLengthBeforeSell, orderBookLengthAfterSell, orderBookLengthAfterCancel, orderKey;
+
+            exchangeInstance.getSellOrderBook.call("FIXED").then((sellOrderBook) => {
+                orderBookLengthBeforeSell = sellOrderBook[0].length;
+                return exchangeInstance.sellToken("FIXED", web3.toWei(2.2, "finney"), 5);
+            }).then((txResult) => {
+                console.log("Tx result", txResult);
+                assert.equal(txResult.logs.length, 1, "Log length should have one Log Message");
+                assert.equal(txResult.logs[0].event, "LimitSellOrderCreated", "LimitSellOrderCreated event not fired");
+                orderKey = txResult.logs[0].args._orderKey;
+                return exchangeInstance.getSellOrderBook.call("FIXED");
+            }).then((sellOrderBook) =>{
+                orderBookLengthAfterSell = sellOrderBook[0].length;
+                assert.equal(orderBookLengthAfterSell,orderBookLengthBeforeSell+ 1, "Sell Orderobok should have one additional order");
+                return exchangeInstance.cancelOrder("FIXED",true, web3.toWei(2.2, "finney"),orderKey)
+            }).then((txResult) => {
+                assert.equal(txResult.logs[0].event, "SellOrderCancelled", "SellOrderCanceled event not fired");
+                return exchangeInstance.getSellOrderBook.call("FIXED");
+            }).then((sellOrderBook) => {
+                orderBookLengthAfterCancel = sellOrderBook[0].length;
+                assert.equal(orderBookLengthAfterCancel, orderBookLengthAfterSell, "Sell Orderbook should have removed an order");
+                assert.equal(sellOrderBook[1][orderBookLengthAfterCancel-1], 0, "Should have zero available volume.")
+            })
     });
 
     it("should be able to create and cancel a buy order", () => {
