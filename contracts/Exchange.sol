@@ -205,7 +205,7 @@ contract Exchange is owned {
                 counter++;
             }
         }
-    return (arrPricesBuy, arrVolumesBuy);
+        return (arrPricesBuy, arrVolumesBuy);
         
     }
 
@@ -222,7 +222,7 @@ contract Exchange is owned {
 
         //Go from lowest price to current price and add them into our price + volume arrays.
         //increment both prices and volume array
-        if(tokens[index].currentSellPrice > 0){
+        if (tokens[index].currentSellPrice > 0) {
         
             while (whilePrice <= tokens[index].highestSellPrice) {
                 arrPricesSell[counter] = whilePrice; 
@@ -248,7 +248,7 @@ contract Exchange is owned {
             }
         }
 
-    return (arrPricesSell, arrVolumesSell);
+         return (arrPricesSell, arrVolumesSell);
     }
 
     //New Bid Order
@@ -256,18 +256,18 @@ contract Exchange is owned {
         uint8 tokenNameIndex = getSymbolIndex(symbolName);
         require(tokenNameIndex > 0);
         uint totalAmountEthNecessary = 0;
-        uint totalAmountEthAvailable = 0;
-
-        totalAmountEthNecessary = amount * priceInWei;
-
-        require(totalAmountEthNecessary >= amount && totalAmountEthNecessary >= priceInWei);
-        require(balanceEthForAddress[msg.sender] >= totalAmountEthNecessary);
-        require(balanceEthForAddress[msg.sender] - totalAmountEthNecessary >= 0);
-
-        balanceEthForAddress[msg.sender] -= totalAmountEthNecessary;
 
         if (tokens[tokenNameIndex].amountSellPrices == 0 || tokens[tokenNameIndex].currentSellPrice > priceInWei) {
             //no offers that can fill this, create a new buy offer in orderbook
+
+            totalAmountEthNecessary = amount * priceInWei;
+
+            require(totalAmountEthNecessary >= amount && totalAmountEthNecessary >= priceInWei);
+            require(balanceEthForAddress[msg.sender] >= totalAmountEthNecessary);
+            require(balanceEthForAddress[msg.sender] - totalAmountEthNecessary >= 0);
+            require(balanceEthForAddress[msg.sender] - totalAmountEthNecessary <= balanceEthForAddress[msg.sender]);
+            balanceEthForAddress[msg.sender] -= totalAmountEthNecessary;
+
             addBuyOffer(tokenNameIndex, priceInWei, amount, msg.sender);
             LimitBuyOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, tokens[tokenNameIndex].buyBook[priceInWei].offers_length);
         } else {
@@ -346,16 +346,16 @@ contract Exchange is owned {
         uint totalAmountEthNecessary = 0;
         uint totalAmountEthAvailable = 0;
 
-        totalAmountEthNecessary = amount * priceInWei;
-
-        require(totalAmountEthNecessary >= amount && totalAmountEthNecessary >= priceInWei);
-        require(tokenBalanceForAddress[msg.sender][tokenNameIndex] >= totalAmountEthNecessary);
-        require(tokenBalanceForAddress[msg.sender][tokenNameIndex] - totalAmountEthNecessary >= 0);
-        require(balanceEthForAddress[msg.sender] + totalAmountEthNecessary >= balanceEthForAddress[msg.sender]);
-
-        tokenBalanceForAddress[msg.sender][tokenNameIndex] -= amount;
-
         if (tokens[tokenNameIndex].amountBuyPrices == 0 || tokens[tokenNameIndex].currentBuyPrice < priceInWei ) {
+            totalAmountEthNecessary = amount * priceInWei;
+
+            require(totalAmountEthNecessary >= amount && totalAmountEthNecessary >= priceInWei);
+            require(tokenBalanceForAddress[msg.sender][tokenNameIndex] >= amount);
+            require(tokenBalanceForAddress[msg.sender][tokenNameIndex] - amount >= 0);
+            require(balanceEthForAddress[msg.sender] + totalAmountEthNecessary >= balanceEthForAddress[msg.sender]);
+
+            tokenBalanceForAddress[msg.sender][tokenNameIndex] -= amount;
+
             //no offers that can fill this, create a new buy offer in orderbook
             addSellOffer(tokenNameIndex, priceInWei, amount, msg.sender);
             LimitSellOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, tokens[tokenNameIndex].sellBook[priceInWei].offers_length);
@@ -372,7 +372,7 @@ contract Exchange is owned {
         //in the order book, we need to reorder the linked list of orders based on a new buy offer coming in
         if (tokens[tokenNameIndex].sellBook[priceInWei].offers_length == 1) {
             tokens[tokenNameIndex].sellBook[priceInWei].offers_key = 1;
-            tokens[tokenNameIndex].amountBuyPrices ++;
+            tokens[tokenNameIndex].amountSellPrices ++;
 
             uint currentSellPrice = tokens[tokenNameIndex].currentSellPrice;
             uint highestSellPrice = tokens[tokenNameIndex].highestSellPrice;

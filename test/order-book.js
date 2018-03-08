@@ -73,9 +73,42 @@ contract("Exchange: Order Book Functionality", (accounts) => {
         });
     });
 
-    it("should be possible to add a buy limit order", () => {
+    // it("should be possible to add a single sell limit order", () => {
+    //     return exchangeInstance.getSellOrderBook.call("FIXED")
+    //     .then( (sellOrderBook) => {
+    //         assert.equal(sellOrderBook.length, 2, "Orderbook should have a length of 2");
+    //         assert.equal(sellOrderBook[0].length, 0, "Orderbook should have no limit buy orders");
+    //         return exchangeInstance.sellToken("FIXED", web3.toWei(1,"finney"), 5);
+    //     }).then((txResult) => {
+    //         //look into logs to assert then get orderbook again
+    //         assert.equal(txResult.logs.length, 1, "There should be at least one log entry");
+    //         assert.equal(txResult.logs[0].event, "LimitSellOrderCreated",  "LimitSellOrderCreated event not fired");
+    //         return exchangeInstance.getSellOrderBook.call("FIXED");
+            
+    //     }).then((sellOrderBook) => {
+    //         assert.equal(sellOrderBook[0].length, 1, "Orderbook price  at zero index should have 1 sell offers");
+    //         assert.equal(sellOrderBook[1].length, 1, "Orderbook volume at zero index should have 1 sell vol instance ");
+         
+    //     });
+    // });
 
+    it("should be possible to add multiple sell limit orders", () => {
+        var sellOrderLengthBeforeSell;
+        return exchangeInstance.getSellOrderBook.call("FIXED").then((sellOrderBook) =>{
+            sellOrderLengthBeforeSell = sellOrderBook[0].length;
+            return exchangeInstance.sellToken("FIXED", web3.toWei(3,"finney"), 5);
+        }).then((txResult) => {
+            assert.equal(txResult.logs.length, 1, "There should have been 1 log message emitted");
+            assert.equal(txResult.logs[0].event, "LimitSellOrderCreated",  "LimitSellOrderCreated event not fired");
+            return exchangeInstance.sellToken("FIXED", web3.toWei(6, "finney"),5);
+        }).then((txResult) => {
+            return exchangeInstance.getSellOrderBook.call("FIXED");
+        }).then((sellOrderBook) => {
+            assert.equal(sellOrderBook[0].length, sellOrderLengthBeforeSell+2, "Orderbook[0] should have 2 sell offers than it started with ")
+            assert.equal(sellOrderBook[1].length, sellOrderLengthBeforeSell+2, "Orderbook[1] should have 2 sell volume elements ")
+        });
     })
+
 
     it("should be able to retrieve buy order book", () => {
 
