@@ -315,7 +315,7 @@ contract Exchange is owned {
                 uint buyPrice = tokens[tokenNameIndex].currentBuyPrice;
                 bool foundSpot = false;
 
-                while(buyPrice > 0 && !foundSpot){
+                while (buyPrice > 0 && !foundSpot) {
 
                     if (buyPrice < priceInWei && tokens[tokenNameIndex].buyBook[buyPrice].higherPrice > priceInWei){
                         //set new order book entry high/low first
@@ -429,5 +429,48 @@ contract Exchange is owned {
         }
     }
     //cancels limit order
-    function cancelOrder(string symbolName,  bool isSellOrder, uint priceInWei, uint offerKey) {}
+    //offerKey here is basically the offers_length when adding a buy/sell order caught from FE.
+    // Issue here is that if the user logs out or FE doesn't store this we may need another lookup.
+    function cancelOrder(string symbolName,  bool isSellOrder, uint priceInWei, uint offerKey) {
+        
+        uint8 tokenNameIndex = getSymbolIndex(symbolName);
+        require(tokenNameIndex > 0);
+
+        // To retrieve aon offer by token, key, and price:
+        // tokens[tokenNameIndex].buyBook[priceInWei].offers[offerKey]
+
+        if (isSellOrder) {
+            //1.look into the sell order book at the address of this offer key make sure its msg.sender
+            require(tokens[tokenNameIndex].sellBook[priceInWei].offers[offerKey].who == msg.sender);
+            //2. get amt of tokens in the offer
+            uint amountOfTokens = tokens[tokenNameIndex].sellBook[priceInWei].offers[offerKey].amount;
+            //3. add tokens back to address' balance
+            tokenBalanceForAddress[msg.sender][tokenNameIndex] += amountOfTokens;
+            //4. remove from sell book
+            tokens[tokenNameIndex].sellBook[priceInWei].offers[offerKey].amount = 0;
+            //5. Event
+            SellOrderCancelled(tokenNameIndex, priceInWei,offerKey);
+
+
+        } else {
+
+            // Basically, refund ether and remove the 'amount' from the offer at key , priceInWei
+
+            require(tokens[tokenNameIndex].buyBook[priceInWei].offers[offerKey].who == msg.sender);
+            uint ethToRefund = tokens[tokenNameIndex].buyBook[priceInWei].offers[offerKey].amount * priceInWei;
+
+            //overflow check
+            require(balanceEthForAddress[msg.sender] + ethToRefund >= balanceEthForAddress[msg.sender]);
+
+            //inccrease balance in contract
+            balanceEthForAddress[msg.sender] += ethToRefund;
+
+            //remove amount in buy book
+            tokens[tokenNameIndex].buyBook[priceInWei].offers[offerKey].amount = 0;
+
+            //5. Event
+            BuyOrderCancelled(tokenNameIndex, priceInWei, offerKey);
+        }
+
+    }
 }
