@@ -350,16 +350,16 @@ contract Exchange is owned {
         uint totalAmountEthNecessary = 0;
         uint totalAmountEthAvailable = 0;
 
-        totalAmountEthNecessary = amount * priceInWei;
-
-        require(totalAmountEthNecessary >= amount && totalAmountEthNecessary >= priceInWei);
-        require(tokenBalanceForAddress[msg.sender][tokenNameIndex] >= amount);
-        require(tokenBalanceForAddress[msg.sender][tokenNameIndex] - amount >= 0);
-        require(balanceEthForAddress[msg.sender] + totalAmountEthNecessary >= balanceEthForAddress[msg.sender]);
-
-        tokenBalanceForAddress[msg.sender][tokenNameIndex] -= amount;
-
         if (tokens[tokenNameIndex].amountBuyPrices == 0 || tokens[tokenNameIndex].currentBuyPrice < priceInWei ) {
+            totalAmountEthNecessary = amount * priceInWei;
+
+            require(totalAmountEthNecessary >= amount && totalAmountEthNecessary >= priceInWei);
+            require(tokenBalanceForAddress[msg.sender][tokenNameIndex] >= amount);
+            require(tokenBalanceForAddress[msg.sender][tokenNameIndex] - amount >= 0);
+            require(balanceEthForAddress[msg.sender] + totalAmountEthNecessary >= balanceEthForAddress[msg.sender]);
+
+            tokenBalanceForAddress[msg.sender][tokenNameIndex] -= amount;
+
             //no offers that can fill this, create a new buy offer in orderbook
             addSellOffer(tokenNameIndex, priceInWei, amount, msg.sender);
             LimitSellOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, tokens[tokenNameIndex].sellBook[priceInWei].offers_length);
@@ -380,6 +380,9 @@ contract Exchange is owned {
                         
                     if (volumeAtPriceFromAddress <= amountNecessary) {
                         totalAmountEthAvailable = volumeAtPriceFromAddress * whilePrice;
+
+                        require(tokenBalanceForAddress[msg.sender][tokenNameIndex] >= volumeAtPriceFromAddress);
+                        tokenBalanceForAddress[msg.sender][tokenNameIndex] -= volumeAtPriceFromAddress;
 
                         //check overflows
                         //token seller has volume
@@ -404,6 +407,8 @@ contract Exchange is owned {
                         //offer has more than we are trying to sell for
                         require(volumeAtPriceFromAddress - amountNecessary > 0);
                         totalAmountEthNecessary = amountNecessary + whilePrice; //total needed is the amt at current iterated price in order book
+                        require(tokenBalanceForAddress[msg.sender][tokenNameIndex] >= amountNecessary);
+                        tokenBalanceForAddress[msg.sender][tokenNameIndex] -= amountNecessary;
 
                         //require that we have enough balaance in the exchange 
                         require(tokenBalanceForAddress[msg.sender][tokenNameIndex] >= amountNecessary);
