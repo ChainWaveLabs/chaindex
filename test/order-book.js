@@ -27,7 +27,7 @@ contract("Exchange: Order Book Functionality", (accounts) => {
             });
     });
 
-    it("should be possible to add  one limit buy", () => {
+    it("should be possible to add one limit buy", () => {
         //from second account, attempt ot purchase the token
         //check balance of tokens on from token contract
         //check balance of tokens in 2nd address
@@ -118,7 +118,6 @@ contract("Exchange: Order Book Functionality", (accounts) => {
             //2. get amt of tokens
             //3. add tokens back to address' balance
             //4. remove from sell book
-            //5. Event
 
             let orderBookLengthBeforeSell, orderBookLengthAfterSell, orderBookLengthAfterCancel, orderKey;
 
@@ -148,9 +147,8 @@ contract("Exchange: Order Book Functionality", (accounts) => {
     it("should be able to create and cancel a buy order", () => {
           //1.look into the sell order book at the address of this offer key make sure its msg.sender
             //2. get amt ether to refund
-            //3. add ethere back to original address' balance
+            //3. add ether back to original address' balance
             //4. remove from buy book
-            //5. Event
 
             let orderBookLengthBeforeBuy, orderBookLengthAfterBuy, orderBookLengthAfterCancel, orderKey;
 
@@ -175,7 +173,32 @@ contract("Exchange: Order Book Functionality", (accounts) => {
                 assert.equal(orderBookLengthAfterCancel, orderBookLengthAfterBuy, "Orderbook should have removed an order");
                 assert.equal(buyOrderBook[1][orderBookLengthAfterCancel-1], 0, "Should have zero available volume.")
             })
-    })
+    });
+
+    it("should be able to make a market sell order", ()=> {
+        return false;
+
+        // return exchangeInstance.getBuyOrderBook.call("FIXED")
+        // .then( (orderBook) => {
+        //     assert.equal(orderBook.length, 2, "Orderbook should have a length of 2");
+        //     assert.equal(orderBook[0].length, 0, "Orderbook should have no limit buy orders");
+        //     return exchangeInstance.buyToken("FIXED", web3.toWei(1,"finney"), 5);
+        // }).then((txResult) => {
+        //     //look into logs to assert then get orderbook again
+        //     assert.equal(txResult.logs.length, 1, "There should be at least one log entry");
+        //     assert.equal(txResult.logs[0].event, "LimitBuyOrderCreated",  "LimitBuyOrderCreated event not fired");
+        //     return exchangeInstance.getBuyOrderBook.call("FIXED");
+            
+        // }).then((orderBook) => {
+        //     assert.equal(orderBook[0].length, 1, "Orderbook price  at zero index should have 1 buy offers");
+        //     assert.equal(orderBook[1].length, 1, "Orderbook volume at zero index should have 1 instance ");
+         
+        // });
+    });
+
+    it("should be able to make a market buy order", ()=> {
+        return false
+    });
 
 
 
