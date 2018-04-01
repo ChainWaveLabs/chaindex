@@ -271,14 +271,49 @@ contract Exchange is owned {
             addBuyOffer(tokenNameIndex, priceInWei, amount, msg.sender);
             LimitBuyOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, tokens[tokenNameIndex].buyBook[priceInWei].offers_length);
         } else {
-            //TODO: market order
+            //TODO: market buy of offer
+            uint totalAmountEtherAvailable = 0;
+            uint whilePrice = tokens[tokenNameIndex].currentSellPrice;
+            uint amountNecessary = amount;
+            uint offers_key;
+
+            while(whilePrice <= priceInWei && amountNecessary > 0){
+                offers_key = tokens[tokenNameIndex].sellBook[whilePrice].offers_key;
+                while(offers_key <= tokens[tokenNameIndex].sellBook[whilePrice].offers_length && amountNecessary > 0){
+                    uint volumeAtPriceFromAddress = tokens[tokenNameIndex].sellBook[whilePrice].offers[offers_key].amount;
+                    //if the market buy offer is not enough to fulfill the market order it should be used up completely and move to next offer
+                    //otherwise we only partially fill the order and lower offerer amt & fulfill out order
+                    if(volumeAtPriceFromAddress <= amountNecessary){
+                        require(balanceEthForAddress[msg.sender] >= totalAmountEtherAvailable);
+                        require(balanceEthForAddress[msg.sender] - totalAmountEtherAvailable <= balanceEthForAddress[msg.sender]);
+                        //reduce senders balance
+                        balanceEthForAddress[msg.sender] -= totalAmountAvailable;
+                        //check for overflows
+                        //check volume that the sender has in their token balance + the volumeAt that price is greater than thheir token balance
+                        require(balanceEthForAddress[msg.sender][tokenNameIndex] + volumeAtPriceFromAddress  <= tokenBalanceForAddress[msg.sender][tokenNameIndex]);
+                        //check the 
+                        require(balanceEthForAddress[tokens[tokenNameIndex].sellBook[whilePrice].offers[offers_key].who] + totalAmountEtherAvailable >= balanceEthForAddress[tokens[tokenNameIndex].sellBook[whilePrice].offers[offers_key].who]); 
+                       
+
+                        //person offers less or equal to volume that is asked for, so it is used completely
+                        //update token balance of sender, remove offers from sell order book, add eth to balance of sender, and iterate the sell book offers key
+                        tokenBalanceForAddress[msg.sender][tokenNameIndex] += volumeAtPriceFromAddress;
+                        tokens[tokenNameIndex].sellBook[whilePrice].offers[offers_key].amount = 0; 
+                        balanceEthForAddress[tokens[tokenNameIndex].sellBook[whilePrice].offers[offers_key].who] += totalAmountEtherAvailable;
+                        tokens[tokenNameIndex].sellBook[whilePrice].offers_key++;
+                        
+                        SellOrderFulfilled(tokenNameIndex, volumeAtPriceFromAddress, whilePrice, offers_key);
+
+                        amountNecessary -= volumeAtPriceFromAddress;
+                    } else{
+
+                    }
+                
+                }//end offers_key while
+            }//end whilePrice while
             marketBuyOffer();
         }
     }
-
-    function marketBuyOffer() {
-        revert();
-    };
 
     function addBuyOffer(uint8 tokenNameIndex, uint priceInWei, uint amount, address who) internal {
         tokens[tokenNameIndex].buyBook[priceInWei].offers_length ++;
