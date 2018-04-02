@@ -8,8 +8,14 @@ import { default as contract } from 'truffle-contract'
 // Import our contract artifacts and turn them into usable abstractions.
 import metacoin_artifacts from '../../build/contracts/MetaCoin.json'
 
+import chaindex_artifacts from '../../build/contracts/Chaindex.json'
+import fixed_token_artifacts from '../../build/contracts/FixedSupplyToken.json'
+import { checkServerIdentity } from "tls";
+
 // MetaCoin is our usable abstraction, which we'll use through the code below.
 var MetaCoin = contract(metacoin_artifacts);
+var ChaindexContract = contract(chaindex_artifacts);
+var FixedTokenContract = contract(fixed_token_artifacts);
 
 // The following code is simple to show off interacting with your contracts.
 // As your needs grow you will likely need to change its form and structure.
@@ -17,6 +23,8 @@ var MetaCoin = contract(metacoin_artifacts);
 var accounts;
 var account;
 
+
+ws
 window.App = {
   start: function() {
     var self = this;

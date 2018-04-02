@@ -269,7 +269,8 @@ contract Exchange is owned {
             balanceEthForAddress[msg.sender] -= totalAmountEthNecessary;
 
             addBuyOffer(tokenNameIndex, priceInWei, amount, msg.sender);
-            LimitBuyOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, tokens[tokenNameIndex].buyBook[priceInWei].offers_length);
+            uint offerLen = tokens[tokenNameIndex].buyBook[priceInWei].offers_length;
+            LimitBuyOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, offerLen);
         } else {
             uint totalAmountEtherAvailable = 0;
             uint whilePrice = tokens[tokenNameIndex].currentSellPrice;
@@ -286,10 +287,10 @@ contract Exchange is owned {
                         require(balanceEthForAddress[msg.sender] >= totalAmountEtherAvailable);
                         require(balanceEthForAddress[msg.sender] - totalAmountEtherAvailable <= balanceEthForAddress[msg.sender]);
                         //reduce senders balance
-                        balanceEthForAddress[msg.sender] -= totalAmountAvailable;
+                        balanceEthForAddress[msg.sender] -= totalAmountEtherAvailable;
                         //check for overflows
                         //check volume that the sender has in their token balance + the volumeAt that price is greater than thheir token balance
-                        require(balanceEthForAddress[msg.sender][tokenNameIndex] + volumeAtPriceFromAddress  <= tokenBalanceForAddress[msg.sender][tokenNameIndex]);
+                        require(tokenBalanceForAddress[msg.sender][tokenNameIndex] + volumeAtPriceFromAddress  <= tokenBalanceForAddress[msg.sender][tokenNameIndex]);
                         //check the 
                         require(balanceEthForAddress[tokens[tokenNameIndex].sellBook[whilePrice].offers[offers_key].who] + totalAmountEtherAvailable >= balanceEthForAddress[tokens[tokenNameIndex].sellBook[whilePrice].offers[offers_key].who]); 
 
@@ -307,8 +308,8 @@ contract Exchange is owned {
 
                         //If market buy offer can fulfil order
                         require(tokens[tokenNameIndex].sellBook[whilePrice].offers[offers_key].amount > amountNecessary);
-                        totalAmountEtherNecessary = amountNecessary * whilePrice;
-                        require(balanceEthForAddress[msg.sender] - totalAmountEtherNecessary <= balanceForEthAtAddress[msg.sender]);
+                        uint totalAmountEtherNecessary = amountNecessary * whilePrice;
+                        require(balanceEthForAddress[msg.sender] - totalAmountEtherNecessary <= balanceEthForAddress[msg.sender]);
                         
                         //redusce ether from sender's balance
                         balanceEthForAddress[msg.sender] -= totalAmountEtherNecessary;
@@ -333,7 +334,7 @@ contract Exchange is owned {
                             tokens[tokenNameIndex].currentSellPrice = 0;
                         } else {
                             tokens[tokenNameIndex].currentSellPrice = tokens[tokenNameIndex].sellBook[whilePrice].higherPrice;
-                            tokens[tokenNameIndex].sellBook[tokens[tokenNameInces].buyBook[whilePrice].higherPrice].lowerPrice = 0;
+                            tokens[tokenNameIndex].sellBook[tokens[tokenNameIndex].buyBook[whilePrice].higherPrice].lowerPrice = 0;
                         }
                     }
                     offers_key++;
@@ -433,7 +434,7 @@ contract Exchange is owned {
             LimitSellOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, tokens[tokenNameIndex].sellBook[priceInWei].offers_length);
         } else {
             //working with sell book. trying to find highest buy offer we can find (currentBuyPrice)
-            unit whilePrice = tokens[tokenNameIndex].currentBuyPrice;
+            uint whilePrice = tokens[tokenNameIndex].currentBuyPrice;
             uint amountNecessary = amount;
             uint offers_key;
 
@@ -482,7 +483,7 @@ contract Exchange is owned {
                         require(tokenBalanceForAddress[msg.sender][tokenNameIndex] >= amountNecessary);
                         //ensure balance has enough eth to cover the amout needed
                         require(balanceEthForAddress[msg.sender] + totalAmountEthNecessary >= balanceEthForAddress[msg.sender]);
-                        require(tokenBalanceForAddress[tokens[tokenNameIndex].buyBook[whilePrice].offers[offers_key].who][tokenNameIndex]+ amountNecessary >= tokenBalanceForAddress[tokens[tokenNameIndex].buyBook[whilePrice].offers[offers_key].who][tokenNameIndex])
+                        require(tokenBalanceForAddress[tokens[tokenNameIndex].buyBook[whilePrice].offers[offers_key].who][tokenNameIndex]+ amountNecessary >= tokenBalanceForAddress[tokens[tokenNameIndex].buyBook[whilePrice].offers[offers_key].who][tokenNameIndex]);
 
                         //Process transaction
                         tokens[tokenNameIndex].buyBook[whilePrice].offers[offers_key].amount -= amountNecessary;
@@ -494,10 +495,10 @@ contract Exchange is owned {
                     }
 
                     //if this was last offer at that price, we need to reorder the currentbuy price and reduce amt of offers in key;
-                    if (offers_key == tokens[tokenNameIndex].buyBook[whilePrice].offers[offers_key].length &&
+                    if (offers_key == tokens[tokenNameIndex].sellBook[whilePrice].offers_length &&
                     tokens[tokenNameIndex].buyBook[whilePrice].offers[offers_key].amount == 0) {
-                        tokens[tokenNameIndex].buyBook[whilePrice].offers[offers_key].amountBuyPrice --;
-
+                       // tokens[tokenNameIndex].buyBook[whilePrice].offers[offers_key].amountBuyPrice --;
+                          tokens[tokenNameIndex].amountSellPrices--;
                         if (whilePrice == tokens[tokenNameIndex].buyBook[whilePrice].lowerPrice ||
                         tokens[tokenNameIndex].buyBook[whilePrice].lowerPrice == 0 ) {
                             tokens[tokenNameIndex].currentBuyPrice = 0;

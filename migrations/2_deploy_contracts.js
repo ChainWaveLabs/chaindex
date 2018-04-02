@@ -1,7 +1,7 @@
 var FixedSupplyToken = artifacts.require('./FixedSupplyToken.sol');
-var Exchange = artifacts.require('./Exchange.sol');
+var Chaindex = artifacts.require('./Chaindex.sol');
 
 module.exports = function(deployer) {
   deployer.deploy(FixedSupplyToken);
-  deployer.deploy(Exchange);
+  deployer.deploy(Chaindex);
 };
