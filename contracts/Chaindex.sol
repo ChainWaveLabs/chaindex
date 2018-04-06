@@ -268,9 +268,9 @@ contract Exchange is owned {
             require(balanceEthForAddress[msg.sender] - totalAmountEthNecessary <= balanceEthForAddress[msg.sender]);
             balanceEthForAddress[msg.sender] -= totalAmountEthNecessary;
 
-            addBuyOffer(tokenNameIndex, priceInWei, amount, msg.sender);
-            uint offerLen = tokens[tokenNameIndex].buyBook[priceInWei].offers_length;
-            LimitBuyOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, offerLen);
+            addLimitBuyOrder(tokenNameIndex, priceInWei, amount, msg.sender);
+           // uint offerLen = tokens[tokenNameIndex].buyBook[priceInWei].offers_length;
+            LimitBuyOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, tokens[tokenNameIndex].buyBook[priceInWei].offers_length);
         } else {
             uint totalAmountEtherAvailable = 0;
             uint whilePrice = tokens[tokenNameIndex].currentSellPrice;
@@ -349,7 +349,7 @@ contract Exchange is owned {
         }
     }
 
-    function addBuyOffer(uint8 tokenNameIndex, uint priceInWei, uint amount, address who) internal {
+    function addLimitBuyOrder(uint8 tokenNameIndex, uint priceInWei, uint amount, address who) internal {
         tokens[tokenNameIndex].buyBook[priceInWei].offers_length ++;
         tokens[tokenNameIndex].buyBook[priceInWei].offers[tokens[tokenNameIndex].buyBook[priceInWei].offers_length] = Offer(amount, who);
 
@@ -481,6 +481,7 @@ contract Exchange is owned {
 
                         //require that we have enough balaance in the exchange 
                         require(tokenBalanceForAddress[msg.sender][tokenNameIndex] >= amountNecessary);
+                    
                         //ensure balance has enough eth to cover the amout needed
                         require(balanceEthForAddress[msg.sender] + totalAmountEthNecessary >= balanceEthForAddress[msg.sender]);
                         require(tokenBalanceForAddress[tokens[tokenNameIndex].buyBook[whilePrice].offers[offers_key].who][tokenNameIndex]+ amountNecessary >= tokenBalanceForAddress[tokens[tokenNameIndex].buyBook[whilePrice].offers[offers_key].who][tokenNameIndex]);
