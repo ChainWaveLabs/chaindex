@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 import "./owned.sol";
 import "./FixedSupplyToken.sol";
 
-contract Exchange is owned {
+contract Chaindex is owned {
 
     struct Offer {
         uint amount;
@@ -270,7 +270,7 @@ contract Exchange is owned {
 
             addLimitBuyOrder(tokenNameIndex, priceInWei, amount, msg.sender);
            // uint offerLen = tokens[tokenNameIndex].buyBook[priceInWei].offers_length;
-            LimitBuyOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, tokens[tokenNameIndex].buyBook[priceInWei].offers_length);
+           // LimitBuyOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, tokens[tokenNameIndex].buyBook[priceInWei].offers_length);
         } else {
             uint totalAmountEtherAvailable = 0;
             uint whilePrice = tokens[tokenNameIndex].currentSellPrice;
