@@ -11,7 +11,7 @@ import 'bootstrap';
 
 import chaindex_artifacts from '../../build/contracts/Chaindex.json'
 import fixed_token_artifacts from '../../build/contracts/FixedSupplyToken.json'
-import { checkServerIdentity } from "tls";
+//import { checkServerIdentity } from "tls";
 
 // MetaCoin is our usable abstraction, which we'll use through the code below.
 
