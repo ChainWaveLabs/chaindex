@@ -14,7 +14,6 @@ module.exports = {
     new CopyWebpackPlugin([
       {from: './app/index.html', to: "index.html"},
       {from: './app/trading.html', to: "trading.html"},
-      {from: './app/admin.html', to: "admin.html"},
       {from: './app/account.html', to: "account.html"}
     ]),
    new webpack.ProvidePlugin({

@@ -1,38 +1,111 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <title>Chain DEX Demo</title>
-  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-  <script src="./app.js"></script>
+    <title>Chain DEX Demo</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <script src="./app.js"></script>
 </head>
+
 <body>
-  <!--BEGIN NAV-->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="#">ChainDeX</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-  
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-          <a class="nav-link" href="index.html">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="trading.html">Trade</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="admin.html">Admin</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="account.html">Account <span class="sr-only">(current)</span></a>
-          </li>
-      </ul>
+    <!--BEGIN NAV-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">ChainDeX</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="index.html">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="trading.html">Trade</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="account.html">Account
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!--END NAV-->
+
+    <div class="container-fluid">
+       
+        <div class="row">
+            <div class="col-sm-12">
+            Manage send your token to others, approve chaindex to trade your tokens, or add a new token to the exchnage.
+            Note: this is demonstration, test-net only. Do not use this in production at this time.
+            </div>
+        </div>
+    
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Send Token</h5>
+                        <p>You have <span id="balanceOfTokenInToken"></span> FixedSupplyToken</p>
+                        <p class="card-text">Send tokens from one account to another</p>
+                        <p>TODO: Token List</p>
+                        <a href="#" class="btn btn-primary">Send Token</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Token Allowance</h5>
+                        <p class="card-text">Approve Chaindex to deduct tokens in your name.</p>
+                        <p>TODO: How much</p>
+                        <a href="#" class="btn btn-primary">Approve Allowance</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Add Token</h5>
+                        <p class="card-text">Admin can add a new ERC20 token to Chaindex.</p>
+                        <p>TODO: Token Name</p>
+                        <p>TODO: Token Contract Address</p>
+                        <p>TODO: Decimals</p>
+                        <a href="#" class="btn btn-primary">Approve Token</a>
+                    </div>
+                </div>
+            </div>
+           
+        </div>
+
+        <div class="row">
+                <div class="col-sm-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Events</h5>
+                                <p class="card-text">
+                                        <h6>Contract Events:</h6>
+                                        <div  id="tokenEvents"  class="alert"></div>
+                                        <h6>JS Status:</h6>
+                                        <div id="status" class="alert"></div>
+                                        <h6>Info:</h6>
+                                        <div id="importantInformation" class="alert"></div>
+                                </p>
+                            </div>
+                        </div>
+                      
+                    </div>
+        </div>
+
     </div>
-  </nav><!--END NAV-->
-  
-  <div class="container-fluid">
-    <h1>Account</h1>
-</div>
+    <script type="text/javascript">
+        window.addEventListener('load', function(){
+            App.initTokenManagement();
+        })
+        </script>
 </body>
+
 </html>
