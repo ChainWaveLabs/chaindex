@@ -1,7 +1,7 @@
 let FixedSupplyToken = artifacts.require("./FixedSupplyToken.sol");
-let Exchange = artifacts.require("./Exchange.sol");
+let Exchange = artifacts.require("./Chaindex.sol");
 
-contract("Exchange: Order Book Functionality", (accounts) => {
+contract("Order Book Functionality", (accounts) => {
     let fsTokenInstance;
     let exchangeInstance;
 

@@ -268,9 +268,9 @@ contract Chaindex is owned {
             require(balanceEthForAddress[msg.sender] - totalAmountEthNecessary <= balanceEthForAddress[msg.sender]);
             balanceEthForAddress[msg.sender] -= totalAmountEthNecessary;
 
-            addLimitBuyOrder(tokenNameIndex, priceInWei, amount, msg.sender);
-           // uint offerLen = tokens[tokenNameIndex].buyBook[priceInWei].offers_length;
-           // LimitBuyOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, tokens[tokenNameIndex].buyBook[priceInWei].offers_length);
+            addBuyOffer(tokenNameIndex, priceInWei, amount, msg.sender);
+            uint offerLen = tokens[tokenNameIndex].buyBook[priceInWei].offers_length;
+            LimitBuyOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, offerLen);
         } else {
             uint totalAmountEtherAvailable = 0;
             uint whilePrice = tokens[tokenNameIndex].currentSellPrice;
@@ -349,7 +349,7 @@ contract Chaindex is owned {
         }
     }
 
-    function addLimitBuyOrder(uint8 tokenNameIndex, uint priceInWei, uint amount, address who) internal {
+    function addBuyOffer(uint8 tokenNameIndex, uint priceInWei, uint amount, address who) internal {
         tokens[tokenNameIndex].buyBook[priceInWei].offers_length ++;
         tokens[tokenNameIndex].buyBook[priceInWei].offers[tokens[tokenNameIndex].buyBook[priceInWei].offers_length] = Offer(amount, who);
 
@@ -422,7 +422,8 @@ contract Chaindex is owned {
         if (tokens[tokenNameIndex].amountBuyPrices == 0 || tokens[tokenNameIndex].currentBuyPrice < priceInWei ) {
             totalAmountEthNecessary = amount * priceInWei;
 
-            require(totalAmountEthNecessary >= amount && totalAmountEthNecessary >= priceInWei);
+            require(totalAmountEthNecessary >= amount);
+            require(totalAmountEthNecessary >= priceInWei);
             require(tokenBalanceForAddress[msg.sender][tokenNameIndex] >= amount);
             require(tokenBalanceForAddress[msg.sender][tokenNameIndex] - amount >= 0);
             require(balanceEthForAddress[msg.sender] + totalAmountEthNecessary >= balanceEthForAddress[msg.sender]);
@@ -481,7 +482,6 @@ contract Chaindex is owned {
 
                         //require that we have enough balaance in the exchange 
                         require(tokenBalanceForAddress[msg.sender][tokenNameIndex] >= amountNecessary);
-                    
                         //ensure balance has enough eth to cover the amout needed
                         require(balanceEthForAddress[msg.sender] + totalAmountEthNecessary >= balanceEthForAddress[msg.sender]);
                         require(tokenBalanceForAddress[tokens[tokenNameIndex].buyBook[whilePrice].offers[offers_key].who][tokenNameIndex]+ amountNecessary >= tokenBalanceForAddress[tokens[tokenNameIndex].buyBook[whilePrice].offers[offers_key].who][tokenNameIndex]);

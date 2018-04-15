@@ -1,5 +1,5 @@
 let FixedSupplyToken = artifacts.require("./FixedSupplyToken.sol");
-let Exchange = artifacts.require("./Exchange.sol");
+let Exchange = artifacts.require("./Chaindex.sol");
 
 contract("Exchange: Deposits and Withdrawals", (accounts) => {
     let fsTokenInstance;

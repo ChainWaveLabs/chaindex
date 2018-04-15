@@ -35,38 +35,65 @@
     <!--END NAV-->
 
     <div class="container-fluid">
-       
+
         <div class="row">
             <div class="col-sm-12">
-            Manage send your token to others, approve chaindex to trade your tokens, or add a new token to the exchnage.
-            Note: this is demonstration, test-net only. Do not use this in production at this time.
+                Manage send your token to others, approve chaindex to trade your tokens, or add a new token to the exchnage. Note: this is
+                demonstration, test-net only. Do not use this in production at this time.
             </div>
         </div>
-    
+
         <div class="row">
-            <div class="col-sm-3">
+            <div class="col-sm-4">
                 <div class="card" style="width: 18rem;">
                     <div class="card-body">
                         <h5 class="card-title">Send Token</h5>
-                        <p>You have <span id="balanceOfTokenInToken"></span> FixedSupplyToken</p>
+                        <p>You have
+                            <strong>
+                                <span id="balanceOfTokenInToken"></span>
+                            </strong> FixedSupplyToken (demo)</p>
                         <p class="card-text">Send tokens from one account to another</p>
-                        <p>TODO: Token List</p>
-                        <a href="#" class="btn btn-primary">Send Token</a>
+                        <form action="">
+                            <div class="form-group">
+                                <label for="inputAmountToSend">Amount to Send</label>
+                                <input type="number" name="inputAmountToSend" class="form-control" id="inputAmountToSend" placeholder="ex: 95">
+                            </div>
+                            <div class="form-group">
+                                <label for="inputTokenReceiverAddress">To address</label>
+                                <input type="text" name="inputTokenReceiverAddress" class="form-control" id="inputTokenReceiverAddress" placeholder="ex: 0x12533418b...">
+                            </div>
+                        </form>
+                        <button type="button" class="btn btn-primary" onclick="App.sendToken(); return false;">Send Token</button>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-3">
+            <div class="col-sm-4">
                 <div class="card" style="width: 18rem;">
                     <div class="card-body">
                         <h5 class="card-title">Token Allowance</h5>
                         <p class="card-text">Approve Chaindex to deduct tokens in your name.</p>
-                        <p>TODO: How much</p>
-                        <a href="#" class="btn btn-primary">Approve Allowance</a>
+                        <p class="card-text">  <strong>
+                                <span id="balanceOfTokensApproved"></span>
+                            </strong> tokens approved for use by chaindex.
+                        </p>
+                        <form action="">
+                                <div class="form-group">
+                                    <label for="inputAmountToApprove">Amount</label>
+                                    <input type="number" name="inputAmountToApprove" class="form-control" id="inputAmountToApprove" placeholder="ex: 95">
+                                </div>
+                                <div class="form-group">
+                                        <label for="inputTokenApprovalReceiver">Recipient</label>
+                                        <input type="text" name="inputTokenApprovalReceiver" class="form-control" id="inputTokenApprovalReceiver" placeholder="ex: 0x343tga">
+                                    </div>
+                            </form>
+
+                            <button type="button" class="btn btn-primary" onclick="App.approveAllowance(); return false;">Approve Amount</button>
+                       
                     </div>
                 </div>
             </div>
 
-            <div class="col-sm-3">
+            <div class="col-sm-4">
                 <div class="card" style="width: 18rem;">
                     <div class="card-body">
                         <h5 class="card-title">Add Token</h5>
@@ -78,34 +105,33 @@
                     </div>
                 </div>
             </div>
-           
+
         </div>
 
         <div class="row">
-                <div class="col-sm-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Events</h5>
-                                <p class="card-text">
-                                        <h6>Contract Events:</h6>
-                                        <div  id="tokenEvents"  class="alert"></div>
-                                        <h6>JS Status:</h6>
-                                        <div id="status" class="alert"></div>
-                                        <h6>Info:</h6>
-                                        <div id="importantInformation" class="alert"></div>
-                                </p>
-                            </div>
-                        </div>
-                      
+            <div class="col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Events</h5>
+                        <p class="card-text">
+                            <h6>Contract Events:</h6>
+                            <div id="tokenEvents" class="alert"></div>
+                            <h6>JS Status:</h6>
+                            <div id="status" class="alert"></div>
+                            <h6>Info:</h6>
+                            <div id="importantInformation" class="alert"></div>
+                        </p>
                     </div>
+                </div>
+            </div>
         </div>
 
     </div>
     <script type="text/javascript">
-        window.addEventListener('load', function(){
+        window.addEventListener('load', function () {
             App.initTokenManagement();
         })
-        </script>
+    </script>
 </body>
 
 </html>
