@@ -78,13 +78,14 @@ contract Chaindex is owned {
     function getEthBalanceInWei() constant returns(uint)  {
         return balanceEthForAddress[msg.sender];}
     //Token Management
-    function addToken(string  symbolName, address erc20TokenAddress) onlyowner {
+    function addToken(string symbolName, address erc20TokenAddress) onlyowner {
         //check if symbol name is in exhange
         require(!hasToken(symbolName));
         symbolNameIndex ++;
         tokens[symbolNameIndex].symbolName = symbolName;
         tokens[symbolNameIndex].tokenContract = erc20TokenAddress;
-        TokenAddedToSystem(symbolNameIndex, symbolName, now);}
+        TokenAddedToSystem(symbolNameIndex, symbolName, now);
+    }
 
     function hasToken(string symbolName) constant returns (bool) {
         
@@ -95,7 +96,8 @@ contract Chaindex is owned {
         }
             
 
-        return true;}
+        return true;
+        }
     //returns index of specific token in tokens mapping by name
     function getSymbolIndex(string symbolName) internal returns(uint8) {
 
@@ -105,7 +107,8 @@ contract Chaindex is owned {
             }
         }
             
-        return 0;}
+        return 0;
+        }
 
     //Standard Solidity string comparison function
     function stringsEqual(string storage _a, string memory _b) internal returns (bool) {

@@ -62,7 +62,23 @@ window.App = {
   broadcastExchangeInfo: function () {},
   initChaindex: function () {},
   chaindexEventObserver: function () {},
-  addTokenToExchange: function () {},
+  addTokenToExchange: function () {
+    var tokenSymbolName = document.getElementById('inputTokenNameToAdd').value;
+    var tokenContractAddress = document.getElementById('inputTokenAddressToAdd').value;
+    App.setStatus("Attempting to add token to exchange (please wait)");
+
+    ChaindexContract.deployed().then(function (instance) {
+      return instance.addToken(tokenSymbolName, tokenContractAddress, {from:account});
+    }).then(function (txResponse) {
+      console.log('token add tx result', txResponse);
+      App.setStatus("Tokens added to Exchange.");
+
+    }).catch(function (e) {
+      console.log(e);
+      App.setStatus('Error adding token to chaindex', e);
+    });
+
+  },
   refreshBalanceOfExchange: function () {},
   depositEth: function () {},
   withdrawEth: function () {},
