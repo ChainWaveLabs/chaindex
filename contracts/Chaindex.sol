@@ -63,22 +63,22 @@ contract Chaindex is owned {
     event BuyOrderCancelled(uint indexed _symbolIndex, uint _priceInWei, uint _orderKey);
 
     //Ether Management
-    function depositEther() payable {
+    function depositEther() payable public {
         require( balanceEthForAddress[msg.sender] + msg.value >= balanceEthForAddress[msg.sender]);
         balanceEthForAddress[msg.sender] += msg.value;
         DepositForEthReceived(msg.sender,msg.value,now);}
 
-    function withdrawEther(uint amountInWei) {
+    function withdrawEther(uint amountInWei) public {
         require(balanceEthForAddress[msg.sender] - amountInWei >= 0);
         require(balanceEthForAddress[msg.sender] - amountInWei <= balanceEthForAddress[msg.sender]);
         balanceEthForAddress[msg.sender] -= amountInWei;
         msg.sender.transfer(amountInWei);
         WithdrawEth(msg.sender,amountInWei,now);}
 
-    function getEthBalanceInWei() constant returns(uint)  {
+    function getEthBalanceInWei() constant public returns(uint)  {
         return balanceEthForAddress[msg.sender];}
     //Token Management
-    function addToken(string symbolName, address erc20TokenAddress) onlyowner {
+    function addToken(string symbolName, address erc20TokenAddress) onlyowner public{
         //check if symbol name is in exhange
         require(!hasToken(symbolName));
         symbolNameIndex ++;
@@ -87,7 +87,7 @@ contract Chaindex is owned {
         TokenAddedToSystem(symbolNameIndex, symbolName, now);
     }
 
-    function hasToken(string symbolName) constant returns (bool) {
+    function hasToken(string symbolName) constant public returns (bool) {
         
         uint8 index = getSymbolIndex(symbolName);
         
@@ -99,7 +99,7 @@ contract Chaindex is owned {
         return true;
         }
     //returns index of specific token in tokens mapping by name
-    function getSymbolIndex(string symbolName) internal returns(uint8) {
+    function getSymbolIndex(string symbolName) public view returns(uint8) {
 
         for (uint8 i = 1; i <= symbolNameIndex; i++) {
             if (stringsEqual(tokens[i].symbolName, symbolName)) {
@@ -111,7 +111,7 @@ contract Chaindex is owned {
         }
 
     //Standard Solidity string comparison function
-    function stringsEqual(string storage _a, string memory _b) internal returns (bool) {
+    function stringsEqual(string storage _a, string memory _b) internal view returns (bool) {
         
         //cast to bytes
         bytes storage a = bytes(_a);
@@ -128,7 +128,7 @@ contract Chaindex is owned {
         return true;}
 
     //Token Depoist and Withdrawal
-    function depositToken( string symbolName, uint amount) {
+    function depositToken( string symbolName, uint amount) public {
 
         //get token index & contract address
         uint8 index = getSymbolIndex(symbolName);
@@ -145,7 +145,7 @@ contract Chaindex is owned {
         tokenBalanceForAddress[msg.sender][index] += amount;
         DepositForTokenReceived(msg.sender, index, amount, now);}
 
-    function withdrawToken(string symbolName, uint amount ) {
+    function withdrawToken(string symbolName, uint amount ) public {
 
         uint8 index = getSymbolIndex(symbolName);
         require(index > 0);
@@ -163,14 +163,14 @@ contract Chaindex is owned {
         WithdrawToken(msg.sender, index, amount, now);
         }
 
-    function getBalance(string symbolName) constant returns (uint) {
+    function getBalance(string symbolName) constant public returns (uint) {
         uint8 index = getSymbolIndex(symbolName);
         require(index>0);
         return tokenBalanceForAddress[msg.sender][index];
     }
 
     //OrderBook - Bids/Buys
-    function getBuyOrderBook(string symbolName) constant returns (uint[], uint[]) {
+    function getBuyOrderBook(string symbolName) constant public returns (uint[], uint[]) {
         //get two arrays - price points and volume per price point
         uint8 index = getSymbolIndex(symbolName);
         require(index > 0);
@@ -213,7 +213,7 @@ contract Chaindex is owned {
     }
 
     //Orderbook - Sells/Asks
-    function getSellOrderBook(string symbolName) constant returns (uint[], uint[]) { 
+    function getSellOrderBook(string symbolName) constant public returns (uint[], uint[]) { 
         uint8 index = getSymbolIndex(symbolName);
         require(index > 0);
 
@@ -255,7 +255,7 @@ contract Chaindex is owned {
     }
 
     //New Bid Order
-    function buyToken(string symbolName, uint priceInWei, uint amount) {
+    function buyToken(string symbolName, uint priceInWei, uint amount) public {
         uint8 tokenNameIndex = getSymbolIndex(symbolName);
         require(tokenNameIndex > 0);
         uint totalAmountEthNecessary = 0;
@@ -416,7 +416,7 @@ contract Chaindex is owned {
     }
 
     //New Ask Order
-    function sellToken(string symbolName, uint priceInWei, uint amount) {
+    function sellToken(string symbolName, uint priceInWei, uint amount) public {
         uint8 tokenNameIndex = getSymbolIndex(symbolName);
         require(tokenNameIndex > 0);
         uint totalAmountEthNecessary = 0;
@@ -593,7 +593,7 @@ contract Chaindex is owned {
     //cancels limit order
     //offerKey here is basically the offers_length when adding a buy/sell order caught from FE.
     // Issue here is that if the user logs out or FE doesn't store this we may need another lookup.
-    function cancelOrder(string symbolName,  bool isSellOrder, uint priceInWei, uint offerKey) {
+    function cancelOrder(string symbolName,  bool isSellOrder, uint priceInWei, uint offerKey) public {
         
         uint8 tokenNameIndex = getSymbolIndex(symbolName);
         require(tokenNameIndex > 0);
