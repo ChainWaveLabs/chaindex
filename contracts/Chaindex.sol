@@ -66,14 +66,14 @@ contract Chaindex is owned {
     function depositEther() payable public {
         require( balanceEthForAddress[msg.sender] + msg.value >= balanceEthForAddress[msg.sender]);
         balanceEthForAddress[msg.sender] += msg.value;
-        DepositForEthReceived(msg.sender,msg.value,now);}
+        emit DepositForEthReceived(msg.sender,msg.value,now);}
 
     function withdrawEther(uint amountInWei) public {
         require(balanceEthForAddress[msg.sender] - amountInWei >= 0);
         require(balanceEthForAddress[msg.sender] - amountInWei <= balanceEthForAddress[msg.sender]);
         balanceEthForAddress[msg.sender] -= amountInWei;
         msg.sender.transfer(amountInWei);
-        WithdrawEth(msg.sender,amountInWei,now);}
+        emit WithdrawEth(msg.sender,amountInWei,now);}
 
     function getEthBalanceInWei() constant public returns(uint)  {
         return balanceEthForAddress[msg.sender];}
@@ -84,7 +84,7 @@ contract Chaindex is owned {
         symbolNameIndex ++;
         tokens[symbolNameIndex].symbolName = symbolName;
         tokens[symbolNameIndex].tokenContract = erc20TokenAddress;
-        TokenAddedToSystem(symbolNameIndex, symbolName, now);
+        emit TokenAddedToSystem(symbolNameIndex, symbolName, now);
     }
 
     function hasToken(string symbolName) constant public returns (bool) {
@@ -143,7 +143,7 @@ contract Chaindex is owned {
         require(token.transferFrom(msg.sender, address(this), amount) == true);
         require(tokenBalanceForAddress[msg.sender][index] + amount >= tokenBalanceForAddress[msg.sender][index]);
         tokenBalanceForAddress[msg.sender][index] += amount;
-        DepositForTokenReceived(msg.sender, index, amount, now);}
+        emit DepositForTokenReceived(msg.sender, index, amount, now);}
 
     function withdrawToken(string symbolName, uint amount ) public {
 
@@ -160,7 +160,7 @@ contract Chaindex is owned {
         require(tokenBalanceForAddress[msg.sender][index] - amount <= tokenBalanceForAddress[msg.sender][index]);
         tokenBalanceForAddress[msg.sender][index] -= amount;
         require(token.transfer(msg.sender, amount) == true);
-        WithdrawToken(msg.sender, index, amount, now);
+        emit WithdrawToken(msg.sender, index, amount, now);
         }
 
     function getBalance(string symbolName) constant public returns (uint) {
@@ -273,7 +273,7 @@ contract Chaindex is owned {
 
             addBuyOffer(tokenNameIndex, priceInWei, amount, msg.sender);
             uint offerLen = tokens[tokenNameIndex].buyBook[priceInWei].offers_length;
-            LimitBuyOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, offerLen);
+            emit LimitBuyOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, offerLen);
         } else {
             uint totalAmountEtherAvailable = 0;
             uint whilePrice = tokens[tokenNameIndex].currentSellPrice;
@@ -304,7 +304,7 @@ contract Chaindex is owned {
                         balanceEthForAddress[tokens[tokenNameIndex].sellBook[whilePrice].offers[offers_key].who] += totalAmountEtherAvailable;
                         tokens[tokenNameIndex].sellBook[whilePrice].offers_key++;
                         
-                        SellOrderFulfilled(tokenNameIndex, volumeAtPriceFromAddress, whilePrice, offers_key);
+                        emit SellOrderFulfilled(tokenNameIndex, volumeAtPriceFromAddress, whilePrice, offers_key);
 
                         amountNecessary -= volumeAtPriceFromAddress;
                     } else {
@@ -326,7 +326,7 @@ contract Chaindex is owned {
                         
                         //reset amnt necessary
                         amountNecessary = 0;
-                        SellOrderFulfilled(tokenNameIndex, amountNecessary, whilePrice, offers_key);
+                        emit SellOrderFulfilled(tokenNameIndex, amountNecessary, whilePrice, offers_key);
                     }
 
                     //check if we have the last offer in the sell book at that price and then reset current buy price lower and reduce offers in sell book.
@@ -435,7 +435,7 @@ contract Chaindex is owned {
 
             //no offers that can fill this, create a new buy offer in orderbook
             addSellOffer(tokenNameIndex, priceInWei, amount, msg.sender);
-            LimitSellOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, tokens[tokenNameIndex].sellBook[priceInWei].offers_length);
+            emit LimitSellOrderCreated(tokenNameIndex, msg.sender, amount, priceInWei, tokens[tokenNameIndex].sellBook[priceInWei].offers_length);
         } else {
             //working with sell book. trying to find highest buy offer we can find (currentBuyPrice)
             uint whilePrice = tokens[tokenNameIndex].currentBuyPrice;
@@ -473,7 +473,7 @@ contract Chaindex is owned {
                         balanceEthForAddress[msg.sender] += totalAmountEthAvailable;
                         tokens[tokenNameIndex].buyBook[whilePrice].offers_key ++;
 
-                        SellOrderFulfilled(tokenNameIndex, volumeAtPriceFromAddress, whilePrice, offers_key);
+                        emit SellOrderFulfilled(tokenNameIndex, volumeAtPriceFromAddress, whilePrice, offers_key);
                         amountNecessary -= volumeAtPriceFromAddress;
                     } else {
                         // alternatively, we use part of what person is offering, decrease his amt, then fulfill the order
@@ -494,7 +494,7 @@ contract Chaindex is owned {
                         balanceEthForAddress[msg.sender] += totalAmountEthNecessary;
                         tokenBalanceForAddress[tokens[tokenNameIndex].buyBook[whilePrice].offers[offers_key].who][tokenNameIndex] += amountNecessary;
 
-                        SellOrderFulfilled(tokenNameIndex, volumeAtPriceFromAddress, whilePrice, offers_key);
+                        emit SellOrderFulfilled(tokenNameIndex, volumeAtPriceFromAddress, whilePrice, offers_key);
                         amountNecessary = 0;
                     }
 
@@ -611,7 +611,7 @@ contract Chaindex is owned {
             //4. remove from sell book
             tokens[tokenNameIndex].sellBook[priceInWei].offers[offerKey].amount = 0;
             //5. Event
-            SellOrderCancelled(tokenNameIndex, priceInWei,offerKey);
+            emit SellOrderCancelled(tokenNameIndex, priceInWei,offerKey);
 
 
         } else {
@@ -631,7 +631,7 @@ contract Chaindex is owned {
             tokens[tokenNameIndex].buyBook[priceInWei].offers[offerKey].amount = 0;
 
             // Event
-            BuyOrderCancelled(tokenNameIndex, priceInWei, offerKey);
+            emit BuyOrderCancelled(tokenNameIndex, priceInWei, offerKey);
         }
 
     }

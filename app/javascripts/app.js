@@ -136,7 +136,6 @@ window.App = {
         //build out popup
         var alertBox = document.createElement('div');
         alertBox.setAttribute('class', 'alert alert-info alert-dismissable');
-
         
         var closeBtn = document.createElement('button');
         closeBtn.setAttribute('type', 'button');
@@ -176,6 +175,7 @@ window.App = {
       tokenInstance = instance;
       return tokenInstance.transfer( receiverOfTokens, amountTokenToSend, {from:account});
     }).then(function (txResponse) {
+      console.log('transfer response', txResponse);
       App.setStatus("Tokens sent!");
       App.updateTokenBalance();
 
@@ -199,7 +199,6 @@ window.App = {
     }).then(function () {
       self.setStatus("Allotment of approved for use by chaindex.");
       App.updateTokenBalance();
-     // App.updateTokensApproved();
 
     }).catch(function (e) {
       console.log(e);
