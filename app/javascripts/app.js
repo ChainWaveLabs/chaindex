@@ -59,29 +59,79 @@ window.App = {
     var status = document.getElementById("status");
     status.innerText = message;
   },
-  broadcastExchangeInfo: function () {},
-  initChaindex: function () {},
-  chaindexEventObserver: function () {},
-  addTokenToExchange: function () {
-    var tokenSymbolName = document.getElementById('inputTokenNameToAdd').value;
-    var tokenContractAddress = document.getElementById('inputTokenAddressToAdd').value;
-    App.setStatus("Attempting to add token to exchange (please wait)");
-
-    ChaindexContract.deployed().then(function (instance) {
-      return instance.addToken(tokenSymbolName, tokenContractAddress, {from:account});
-    }).then(function (txResponse) {
-      console.log('token add tx result', txResponse);
-      App.setStatus("Tokens added to Exchange.");
-
-    }).catch(function (e) {
-      console.log(e);
-      App.setStatus('Error adding token to chaindex', e);
-    });
+  
+  initChaindex: function () {
+    App.refreshBalanceOfExchange();
+    App.broadcastExchangeInfo();
+    App.chaindexEventObserver();
 
   },
-  refreshBalanceOfExchange: function () {},
-  depositEth: function () {},
-  withdrawEth: function () {},
+  chaindexEventObserver: function () {},
+
+  broadcastExchangeInfo: function () {
+    console.log("Broadcast exchange info")
+    //Information on the exchange include contract address, token contract address, and account balances
+    //contract information
+    ChaindexContract.deployed().then(function(instance){
+      console.log(instance.address);
+      var divContractAddress = document.createElement("div");
+      divContractAddress.appendChild(document.createTextNode("Chaindex Contract:" + instance.address));
+      divContractAddress.setAttribute("class", "alert alert-info");
+      document.getElementById("importantInformation").appendChild(divContractAddress);
+    });
+
+    //token information
+    FixedTokenContract.deployed().then(function(instance){
+      console.log(instance.address);
+      var divTokenAddress = document.createElement("div");
+      divTokenAddress.appendChild(document.createTextNode("Token Contract:" + instance.address));
+      divTokenAddress.setAttribute("class", "alert alert-info");
+      document.getElementById("importantInformation").appendChild(divTokenAddress);
+    })
+
+    //account address & balance
+    web3.eth.getAccounts(function(err,ethAccounts){
+      web3.eth.getBalance(ethAccounts[0], function(err1, balance){
+        console.log(ethAccounts[0]);
+        console.log(web3.fromWei(balance,"ether"));
+        var divAccounts = document.createElement("div");
+        var div = document.createElement("div");
+        div.appendChild(document.createTextNode("Main Account:"+ethAccounts[0]));
+        var div2 = document.createElement("div");
+        div2.appendChild(document.createTextNode("Eth Balance:"+ web3.fromWei(balance,"ether")));
+        divAccounts.appendChild(div);
+        divAccounts.appendChild(div2);
+        divAccounts.setAttribute("class", "alert alert-info");
+        document.getElementById("importantInformation").appendChild(divAccounts);
+      })
+    })
+
+  },
+
+
+  refreshBalanceOfExchange: function () {
+    console.log("refresh balance")
+    var self = this;
+
+    var chaindexInstance;
+
+   ChaindexContract.deployed().then(function(instance){
+     chaindexInstance = instance;
+     return chaindexInstance.getBalance("FIXED");
+   }).then(function(value){
+     var balance_el = document.getElementById("balanceOfTokenInExchange");
+     balance_el.innerHTML = value.toNumber();
+     return chaindexInstance.getEthBalanceInWei();
+   }).then(function(value){
+     var balance_el = document.getElementById("balanceOfEtherInExchange");
+     balance_el.innerHTML = web3.fromWei(value,"ether");
+   }).catch(function(e){
+     console.log(e);
+     self.setStatus("Error Getting balances. Check log for details");
+   });
+  },
+  depositEther: function () {},
+  withdrawEther: function () {},
   depositToken: function () {},
   withdrawToken: function () {},
 
@@ -161,6 +211,23 @@ window.App = {
     }).catch(function (e) {
       console.log(e);
       App.setStatus('Error in events', e);
+    });
+
+  },
+  addTokenToExchange: function () {
+    var tokenSymbolName = document.getElementById('inputTokenNameToAdd').value;
+    var tokenContractAddress = document.getElementById('inputTokenAddressToAdd').value;
+    App.setStatus("Attempting to add token to exchange (please wait)");
+
+    ChaindexContract.deployed().then(function (instance) {
+      return instance.addToken(tokenSymbolName, tokenContractAddress, {from:account});
+    }).then(function (txResponse) {
+      console.log('token add tx result', txResponse);
+      App.setStatus("Tokens added to Exchange.");
+
+    }).catch(function (e) {
+      console.log(e);
+      App.setStatus('Error adding token to chaindex', e);
     });
 
   },
