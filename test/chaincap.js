@@ -11,6 +11,7 @@ contract('ChainCap', (accounts) => {
 
     describe('Admin / Owner Functionality', async () => {
         it('has an owner', async () => {
+            console.log('test for build');
             assert.equal(await chainCap.getOwner(), owner)
         })
 
