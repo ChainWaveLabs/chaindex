@@ -62,10 +62,10 @@ window.App = {
   
   initChaindex: function () {
     App.refreshBalanceOfExchange();
-    App.broadcastExchangeInfo();
+     App.broadcastExchangeInfo();
     App.chaindexEventObserver();
-
   },
+
   chaindexEventObserver: function () {},
 
   broadcastExchangeInfo: function () {
@@ -105,24 +105,28 @@ window.App = {
         document.getElementById("importantInformation").appendChild(divAccounts);
       })
     })
-
   },
 
-
   refreshBalanceOfExchange: function () {
-    console.log("refresh balance")
+    console.log("refresh balance of exchange")
     var self = this;
 
     var chaindexInstance;
 
    ChaindexContract.deployed().then(function(instance){
+     console.log("Chaindex instance address", instance.address);
      chaindexInstance = instance;
-     return chaindexInstance.getBalance("FIXED");
+    // return chaindexInstance.getBalance("FIXED");
+    console.log("Chaindex instance", chaindexInstance);
+     //return chaindexInstance.getBalance("FIXED");
+     return chaindexInstance.getBuyOrderBook("FIXED");
    }).then(function(value){
+     console.log("Chaindex token balance", value.toNumber());
      var balance_el = document.getElementById("balanceOfTokenInExchange");
      balance_el.innerHTML = value.toNumber();
      return chaindexInstance.getEthBalanceInWei();
    }).then(function(value){
+    console.log("Chaindex eth balance", value.toNumber());
      var balance_el = document.getElementById("balanceOfEtherInExchange");
      balance_el.innerHTML = web3.fromWei(value,"ether");
    }).catch(function(e){
@@ -130,6 +134,7 @@ window.App = {
      self.setStatus("Error Getting balances. Check log for details");
    });
   },
+  //DEPOSITS/WITHDRAWAL in Chaindex
   depositEther: function () {},
   withdrawEther: function () {},
   depositToken: function () {},
@@ -164,9 +169,7 @@ window.App = {
     }).then(function (value) {
       console.log('val', value);
       var balance = document.getElementById("balanceOfTokenInToken");
-      console.log('updating balance txt',balance.innerText);
       balance.innerText= value.valueOf();
-      console.log('updated balance txt',balance.innerText );
     }).catch(function (e) {
       console.log(e);
       App.setStatus('Error getting token balance', e);

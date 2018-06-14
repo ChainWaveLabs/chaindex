@@ -125,7 +125,8 @@ contract Chaindex is owned {
                 return false;
             }
         }
-        return true;}
+        return true;
+        }
 
     //Token Depoist and Withdrawal
     function depositToken( string symbolName, uint amount) public {
@@ -161,7 +162,7 @@ contract Chaindex is owned {
         tokenBalanceForAddress[msg.sender][index] -= amount;
         require(token.transfer(msg.sender, amount) == true);
         emit WithdrawToken(msg.sender, index, amount, now);
-        }
+    }
 
     function getBalance(string symbolName) constant public returns (uint) {
         uint8 index = getSymbolIndex(symbolName);
